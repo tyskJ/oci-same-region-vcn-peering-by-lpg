@@ -1,0 +1,72 @@
+# ************************************************************
+# Header
+# ************************************************************
+title: oci-same-region-vcn-peering-by-lpg-stack
+description: OCI Same Region VCN Peering By LPG Stack
+schemaVersion: 1.1.0
+version: "20260525"
+locale: "en"
+
+# ************************************************************
+# Variable Groups
+# ************************************************************
+variableGroups:
+  - title: Common Variables
+    visible: true
+    variables:
+      - system_name
+  - title: NW Variables
+    visible: true
+    variables:
+      - vcn_cidr
+      - souce_ip
+
+# ************************************************************
+# Variables
+# ************************************************************
+variables:
+  # ---- Hidden Variables ---- #
+  ### Tenancy OCID
+  tenancy_ocid:
+    title: Tenancy OCID
+    description: The Oracle Cloud Identifier (OCID) for your tenancy
+    type: string
+    required: true
+    visible: false
+  ### Region Name
+  region_name:
+    title: Region
+    description: The region in which to create all resouces
+    type: oci:identity:region:name
+    required: true
+    visible: false
+
+  # ---- Common Variables ---- #
+  ### System Name
+  system_name:
+    title: System Name
+    description: The System Name for Your Resources
+    type: string
+    required: true
+    visible: true
+
+  # ---- NW Variables ---- #
+  ### VCN Cidr
+  vcn_cidr:
+    title: Virtual Cloud Network CIDR
+    description: VCN CIDR for Your Create
+    type: enum
+    enum:
+      - 10.0.0.0/16
+      - 172.16.0.0/16
+      - 192.168.0.0/16
+    default: 10.0.0.0/16
+    required: true
+    visible: true
+  ### Source IP
+  souce_ip:
+    title: Souce IP CIDR
+    description: Souce IP CIDR for Restricted Access
+    type: string
+    required: true
+    visible: true
