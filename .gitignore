@@ -42,3 +42,4 @@ terraform.rc
 **/.terraform.lock.hcl
 tmp.tf
 **/.key/*
+*.zip
