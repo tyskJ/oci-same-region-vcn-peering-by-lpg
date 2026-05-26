@@ -18,7 +18,8 @@ variableGroups:
   - title: NW Variables
     visible: true
     variables:
-      - vcn_cidr
+      - vcn_a_cidr
+      - vcn_b_cidr
       - source_ip
 
 # ************************************************************
@@ -52,15 +53,26 @@ variables:
 
   # ---- NW Variables ---- #
   ### VCN Cidr
-  vcn_cidr:
-    title: Virtual Cloud Network CIDR
-    description: CIDR block for the VCN to create
+  vcn_a_cidr:
+    title: Virtual Cloud Network A CIDR
+    description: CIDR block for the VCN A to create
     type: enum
     enum:
       - 10.0.0.0/16
       - 172.16.0.0/16
       - 192.168.0.0/16
     default: 10.0.0.0/16
+    required: true
+    visible: true
+  vcn_b_cidr:
+    title: Virtual Cloud Network B CIDR
+    description: CIDR block for the VCN B to create
+    type: enum
+    enum:
+      - 10.0.0.0/16
+      - 172.16.0.0/16
+      - 192.168.0.0/16
+    default: 172.16.0.0/16
     required: true
     visible: true
   ### Source IP
