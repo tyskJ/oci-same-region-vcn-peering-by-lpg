@@ -87,14 +87,18 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 ---------------------------------------------------------------------
 .. code-block:: bash
 
+  REGION=$(awk -F= '/\[ADMIN\]/{f=1} f && /^region=/{print $2; exit}' ~/.oci/config)
   SYSTEM_NAME="oci-same-region-vcn-peering-by-lpg"
   TF_VER="1.5.x"
   SOURCE_IP="送信元IPアドレス(CIDR形式)"
+  STACK_NAME="${SYSTEM_NAME}-stack"
 
 .. code-block:: bash
 
   cat <<EOF > terraform.tfvars.json
   {
+    "tenancy_ocid": "${TENANCY_ID}",
+    "region": "${REGION}",
     "system_name": "${SYSTEM_NAME}",
     "vcn_a_cidr": "10.0.0.0/16",
     "vcn_b_cidr": "172.16.0.0/16",
@@ -106,7 +110,7 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 
   oci resource-manager stack create \
   --compartment-id "${TENANCY_ID}" \
-  --display-name "${SYSTEM_NAME}-stack" \
+  --display-name "${STACK_NAME}" \
   --description "Dev Stack" \
   --config-source "${ZIP_FILE}" \
   --working-directory "envs" \
@@ -114,6 +118,20 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
   --variables file://terraform.tfvars.json \
   --wait-for-state "ACTIVE" \
   --profile ADMIN --auth security_token
+
+2. Plan Job 作成
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  STACK_ID=$(oci resource-manager stack list \
+    --all \
+    --compartment-id "${TENANCY_ID}" \
+    --display-name "${STACK_NAME}" \
+    --profile ADMIN --auth security_token \
+    --query 'data[0].id' \
+    --raw-output)
+
+
 
 参考資料
 =====================================================================
