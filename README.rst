@@ -16,9 +16,8 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 
 作業環境 - ローカル -
 =====================================================================
-* macOS Tahoe ( v26.3.1(a) )
-* Visual Studio Code 1.113.0
-* Terraform v1.15.1
+* macOS Tahoe ( v26.5 )
+* Visual Studio Code 1.121.0
 * oci cli 3.71.0
 * Python 3.14.2
 
@@ -29,6 +28,11 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 前提条件
 =====================================================================
 * ``manage all-resources IN TENANCY`` を付与した IAM グループに所属する IAM ユーザーが作成されていること
+* 以下コマンドを実行し、*ADMIN* プロファイルを作成していること (デフォルトリージョンは *ap-tokyo-1* )
+
+.. code-block:: bash
+
+  oci session authenticate
 
 事前作業 - ローカル -
 =====================================================================
