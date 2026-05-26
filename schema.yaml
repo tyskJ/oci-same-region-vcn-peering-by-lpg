@@ -19,7 +19,7 @@ variableGroups:
     visible: true
     variables:
       - vcn_cidr
-      - souce_ip
+      - source_ip
 
 # ************************************************************
 # Variables
@@ -34,9 +34,9 @@ variables:
     required: true
     visible: false
   ### Region Name
-  region_name:
+  region:
     title: Region
-    description: The region in which to create all resouces
+    description: The region in which to create all resources
     type: oci:identity:region:name
     required: true
     visible: false
@@ -54,7 +54,7 @@ variables:
   ### VCN Cidr
   vcn_cidr:
     title: Virtual Cloud Network CIDR
-    description: VCN CIDR for Your Create
+    description: CIDR block for the VCN to create
     type: enum
     enum:
       - 10.0.0.0/16
@@ -64,7 +64,7 @@ variables:
     required: true
     visible: true
   ### Source IP
-  souce_ip:
+  source_ip:
     title: Souce IP CIDR
     description: Souce IP CIDR for Restricted Access
     type: string
