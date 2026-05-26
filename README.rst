@@ -40,35 +40,6 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 ---------------------------------------------------------------------
 * `GitHub <https://github.com/tyskJ/common-environment-setup>`_ を参照
 
-事前作業(2)
-=====================================================================
-1. *tfstate* 用バケット作成
----------------------------------------------------------------------
-.. code-block:: bash
-
-  TENANCY_ID=$(oci iam compartment list \
-    --lifecycle-state ACTIVE \
-    --include-root \
-    --profile ADMIN \
-    --auth security_token \
-    --query "data[?\"compartment-id\"==null].id | [0]" \
-    --raw-output)
-
-.. code-block:: bash
-
-  BUCKET_NAME="terraform-working"
-
-.. code-block:: bash
-
-  oci os bucket create \
-  --compartment-id "${TENANCY_ID}" \
-  --name "${BUCKET_NAME}" \
-  --profile ADMIN --auth security_token
-
-.. note::
-
-  * バケット名は、テナンシかつリージョン内で一意であれば作成できます
-
 事前作業 - ローカル -
 =====================================================================
 1. 定義ファイルの圧縮
@@ -131,7 +102,139 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
     --query 'data[0].id' \
     --raw-output)
 
+.. code-block:: bash
 
+  PLAN_JOB_ID=$(oci resource-manager job create-plan-job \
+    --stack-id "${STACK_ID}" \
+    --display-name "${STACK_NAME}-plan" \
+    --wait-for-state "SUCCEEDED" \
+    --profile ADMIN --auth security_token \
+    --query 'data.id' \
+    --raw-output)
+
+.. code-block:: bash
+
+  oci resource-manager job get-job-tf-plan \
+    --job-id "${PLAN_JOB_ID}" \
+    --tf-plan-format JSON \
+    --file tfplan.json \
+    --profile ADMIN \
+    --auth security_token >/dev/null
+
+  jq -r '
+  .resource_changes[]
+  ' tfplan.json
+
+3. Deploy
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  oci resource-manager job create-apply-job \
+    --stack-id "${STACK_ID}" \
+    --execution-plan-strategy FROM_PLAN_JOB_ID \
+    --execution-plan-job-id "${PLAN_JOB_ID}" \
+    --display-name "${STACK_NAME}-apply" \
+    --wait-for-state SUCCEEDED \
+    --profile ADMIN \
+    --auth security_token
+
+後片付け - ローカル -
+=====================================================================
+1. 環境削除
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  oci resource-manager job create-destroy-job \
+    --stack-id "${STACK_ID}" \
+    --execution-plan-strategy AUTO_APPROVED \
+    --display-name "${STACK_NAME}-destroy" \
+    --wait-for-state SUCCEEDED \
+    --profile ADMIN \
+    --auth security_token \
+    --query 'data.id' \
+    --raw-output
+
+.. code-block:: bash
+
+  oci resource-manager stack delete \
+    --stack-id "${STACK_ID}" \
+    --force \
+    --wait-for-state DELETED \
+    --profile ADMIN \
+    --auth security_token
+
+番外編
+=====================================================================
+スタック更新
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  oci resource-manager stack update \
+    --stack-id "${STACK_ID}" \
+    --config-source ${ZIP_FILE} \
+    --profile ADMIN \
+    --auth security_token
+
+.. code-block:: bash
+
+  PLAN_JOB_ID=$(oci resource-manager job create-plan-job \
+    --stack-id "${STACK_ID}" \
+    --display-name "${STACK_NAME}-plan" \
+    --wait-for-state "SUCCEEDED" \
+    --profile ADMIN --auth security_token \
+    --query 'data.id' \
+    --raw-output)
+
+.. code-block:: bash
+
+  oci resource-manager job get-job-tf-plan \
+    --job-id "${PLAN_JOB_ID}" \
+    --tf-plan-format JSON \
+    --file tfplan.json \
+    --profile ADMIN \
+    --auth security_token >/dev/null
+
+  jq -r '
+  .resource_changes[]
+  ' tfplan.json
+
+.. code-block:: bash
+
+  oci resource-manager job create-apply-job \
+    --stack-id "${STACK_ID}" \
+    --execution-plan-strategy FROM_PLAN_JOB_ID \
+    --execution-plan-job-id "${PLAN_JOB_ID}" \
+    --display-name "${STACK_NAME}-apply" \
+    --wait-for-state SUCCEEDED \
+    --profile ADMIN \
+    --auth security_token
+
+オブジェクトバルクアップロード
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  oci os object bulk-upload \
+    --bucket-name "${BUCKET_NAME}" \
+    --src-dir . \
+    --overwrite \
+    --exclude ".gitconfig" \
+    --exclude "*.zip" \
+    --exclude "*.md" \
+    --exclude "*.rst" \
+    --exclude ".gitignore" \
+    --exclude "doc/*" \
+    --exclude ".git/*" \
+    --exclude ".DS_Store" \
+    --profile ADMIN --auth security_token
+
+オブジェクトバルクデリート
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  oci os object bulk-delete \
+    --bucket-name "${BUCKET_NAME}" \
+    --force \
+    --profile ADMIN --auth security_token
 
 参考資料
 =====================================================================
