@@ -93,18 +93,24 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 
 .. code-block:: bash
 
+  cat <<EOF > terraform.tfvars.tf
+  {
+    "system_name": "${SYSTEM_NAME}",
+    "vcn_a_cidr": "10.0.0.0/16",
+    "vcn_b_cidr": "172.16.0.0/16",
+    "source_ip": "${SOURCE_IP}"
+  }
+  EOF
+
+.. code-block:: bash
+
   oci resource-manager stack create \
   --compartment-id "${TENANCY_ID}" \
   --display-name "${SYSTEM_NAME}-stack" \
   --description "Dev Stack" \
   --config-source "${ZIP_FILE}" \
   --terraform-version "${TF_VER}" \
-  --variables '{
-    "system_name": "${SYSTEM_NAME}",
-    "vcn_a_cidr": "10.0.0.0/16",
-    "vcn_b_cidr": "172.16.0.0/16",
-    "source_ip": "${SOURCE_IP}"
-  }' \
+  --variables file://terraform.tfvars.tf \
   --wait-for-state "ACTIVE" \
   --profile ADMIN --auth security_token
 
