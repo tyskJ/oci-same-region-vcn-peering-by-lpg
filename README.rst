@@ -93,7 +93,7 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 
 .. code-block:: bash
 
-  cat <<EOF > terraform.tfvars.tf
+  cat <<EOF > terraform.tfvars.json
   {
     "system_name": "${SYSTEM_NAME}",
     "vcn_a_cidr": "10.0.0.0/16",
@@ -109,14 +109,11 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
   --display-name "${SYSTEM_NAME}-stack" \
   --description "Dev Stack" \
   --config-source "${ZIP_FILE}" \
+  --working-directory "envs" \
   --terraform-version "${TF_VER}" \
-  --variables file://terraform.tfvars.tf \
+  --variables file://terraform.tfvars.json \
   --wait-for-state "ACTIVE" \
   --profile ADMIN --auth security_token
-
-
-
-
 
 参考資料
 =====================================================================
