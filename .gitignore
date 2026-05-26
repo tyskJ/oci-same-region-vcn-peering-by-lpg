@@ -43,3 +43,4 @@ terraform.rc
 tmp.tf
 **/.key/*
 *.zip
+tfplan.json
