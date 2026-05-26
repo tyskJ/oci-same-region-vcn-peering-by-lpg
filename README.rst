@@ -34,16 +34,82 @@ OCI Local Peering Gateway で同一リージョン VCN 間を接続する
 
   oci session authenticate
 
+事前作業(1)
+=====================================================================
+1. 各種モジュールインストール
+---------------------------------------------------------------------
+* `GitHub <https://github.com/tyskJ/common-environment-setup>`_ を参照
+
+事前作業(2)
+=====================================================================
+1. *tfstate* 用バケット作成
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  TENANCY_ID=$(oci iam compartment list \
+    --lifecycle-state ACTIVE \
+    --include-root \
+    --profile ADMIN \
+    --auth security_token \
+    --query "data[?\"compartment-id\"==null].id | [0]" \
+    --raw-output)
+
+.. code-block:: bash
+
+  BUCKET_NAME="terraform-working"
+
+.. code-block:: bash
+
+  oci os bucket create \
+  --compartment-id "${TENANCY_ID}" \
+  --name "${BUCKET_NAME}" \
+  --profile ADMIN --auth security_token
+
+.. note::
+
+  * バケット名は、テナンシかつリージョン内で一意であれば作成できます
+
 事前作業 - ローカル -
 =====================================================================
 1. 定義ファイルの圧縮
 ---------------------------------------------------------------------
 .. code-block:: bash
 
-  zip -r stack.zip *.tf .terraform-version schema.yml modules
+  ZIP_FILE="stack.zip"
+
+.. code-block:: bash
+
+  zip -r "${ZIP_FILE}" envs modules
 
 実作業 - OCI Resource Manager -
 =====================================================================
+1. スタック作成
+---------------------------------------------------------------------
+.. code-block:: bash
+
+  SYSTEM_NAME="oci-same-region-vcn-peering-by-lpg"
+  TF_VER="1.5.x"
+  SOURCE_IP="送信元IPアドレス(CIDR形式)"
+
+.. code-block:: bash
+
+  oci resource-manager stack create \
+  --compartment-id "${TENANCY_ID}" \
+  --display-name "${SYSTEM_NAME}-stack" \
+  --description "Dev Stack" \
+  --config-source "${ZIP_FILE}" \
+  --terraform-version "${TF_VER}" \
+  --variables '{
+    "system_name": "${SYSTEM_NAME}",
+    "vcn_a_cidr": "10.0.0.0/16",
+    "vcn_b_cidr": "172.16.0.0/16",
+    "source_ip": "${SOURCE_IP}"
+  }' \
+  --wait-for-state "ACTIVE" \
+  --profile ADMIN --auth security_token
+
+
+
 
 
 参考資料
